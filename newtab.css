@@ -1,0 +1,690 @@
+@font-face {
+    font-family: 'Segoe MDL2 Assets';
+    src: local('Segoe MDL2 Assets');
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+    min-height: 100vh;
+    overflow: hidden;
+    background: #001a33;
+}
+
+/* Windows 10 Desktop */
+.desktop {
+    width: 100vw;
+    height: 100vh;
+    background: #001a33;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.desktop-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 60px 20px 80px;
+    overflow-y: auto;
+}
+
+/* Clock — Windows 10 Lock Screen */
+.clock-section {
+    text-align: center;
+    margin-bottom: 48px;
+    color: #fff;
+}
+
+.time {
+    font-size: 96px;
+    font-weight: 300;
+    letter-spacing: -1px;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.date {
+    font-size: 20px;
+    font-weight: 300;
+    opacity: 0.85;
+}
+
+/* Search — Windows 10 Cortana */
+.search-section {
+    width: 100%;
+    max-width: 560px;
+    margin-bottom: 48px;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.12);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 0;
+    padding: 0 0 0 12px;
+    transition: all 0.15s ease;
+    height: 40px;
+}
+
+.search-container:focus-within {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: #0078d4;
+}
+
+.search-icon {
+    color: rgba(255, 255, 255, 0.6);
+    flex-shrink: 0;
+}
+
+.search-input {
+    flex: 1;
+    padding: 8px 10px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+    outline: none;
+    color: #fff;
+}
+
+.search-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.search-btn {
+    width: 40px;
+    height: 40px;
+    background: #0078d4;
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+
+.search-btn:hover {
+    background: #1a86d9;
+}
+
+
+/* Tiles — Windows 10 Start Menu */
+.tiles-section {
+    width: 100%;
+    max-width: 680px;
+}
+
+.tiles-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.tiles-header h3 {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.add-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    font-family: 'Segoe MDL2 Assets', sans-serif;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+
+.add-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.tiles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 4px;
+}
+
+.shortcut-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+    text-decoration: none;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    min-height: 100px;
+    position: relative;
+    overflow: hidden;
+}
+
+.shortcut-item:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.shortcut-item:hover .shortcut-delete {
+    opacity: 1;
+}
+
+.shortcut-delete {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 12px;
+    border: none;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.15s;
+    z-index: 2;
+}
+
+.shortcut-delete:hover {
+    background: #e81123;
+    color: #fff;
+}
+
+.shortcut-item:active {
+    background: rgba(255, 255, 255, 0.05);
+    transform: scale(0.97);
+}
+
+.shortcut-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 18px;
+    background: transparent;
+}
+
+.shortcut-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.shortcut-name {
+    font-size: 12px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Taskbar — Windows 10 */
+.taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(30px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    z-index: 100;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.taskbar-left {
+    display: flex;
+    align-items: center;
+}
+
+.start-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+
+.start-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.taskbar-center {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.taskbar-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+}
+
+.taskbar-stat svg {
+    opacity: 0.7;
+}
+
+.taskbar-right {
+    display: flex;
+    align-items: center;
+}
+
+.taskbar-clock {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 2px 8px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.2;
+    cursor: default;
+}
+
+.taskbar-clock:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Start Menu — Windows 10 */
+.start-menu {
+    position: fixed;
+    bottom: 40px;
+    left: 0;
+    width: 240px;
+    height: auto;
+    max-height: 420px;
+    background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    z-index: 200;
+    transform: translateY(20px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.15s ease;
+}
+
+.start-menu.open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
+}
+
+.start-menu-left {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.start-menu-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    color: #fff;
+    font-size: 14px;
+}
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.start-menu-nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 8px 0;
+    overflow-y: auto;
+}
+
+.start-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    font-size: 13px;
+    transition: background 0.1s;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+}
+
+.start-nav-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.start-nav-item svg {
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.start-menu-power {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 4px 0;
+}
+
+/* Dialog — Windows 10 */
+.shortcut-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+.dialog-content {
+    background: #2b2b2b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 24px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    animation: dialogFadeIn 0.2s ease;
+}
+
+.dialog-content h3 {
+    font-size: 18px;
+    font-weight: 400;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 6px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 14px;
+    font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+    outline: none;
+    color: #fff;
+    transition: border-color 0.15s;
+}
+
+.form-group input:focus {
+    border-color: #0078d4;
+}
+
+.form-group input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.dialog-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+    justify-content: flex-end;
+}
+
+.dialog-buttons button {
+    padding: 8px 24px;
+    border: none;
+    font-size: 14px;
+    font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-cancel {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.btn-confirm {
+    background: #0078d4;
+    color: white;
+}
+
+.btn-confirm:hover {
+    background: #1a86d9;
+}
+
+@keyframes dialogFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Notification — Windows 10 Toast */
+.notification {
+    position: fixed;
+    bottom: 48px;
+    right: -360px;
+    width: 340px;
+    background: #1f1f1f;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 2000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    box-shadow: -2px 0 16px rgba(0, 0, 0, 0.4);
+}
+
+.notification.show {
+    right: 8px;
+    opacity: 1;
+}
+
+.notification-bar {
+    height: 3px;
+    background: #0078d4;
+}
+
+.notification-content {
+    padding: 14px 16px;
+    position: relative;
+}
+
+.notification-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.notification-message {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+}
+
+.notification-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.5);
+    font-family: 'Segoe MDL2 Assets', sans-serif;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.notification-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .desktop-content {
+        padding: 20px 16px 60px;
+    }
+
+    .time {
+        font-size: 56px;
+    }
+
+    .date {
+        font-size: 16px;
+    }
+
+    .search-section {
+        max-width: 100%;
+        margin-bottom: 32px;
+    }
+
+    .search-container {
+        height: 36px;
+        padding: 0 0 0 12px;
+    }
+
+    .search-input {
+        font-size: 14px;
+    }
+
+    .search-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    .tiles-section {
+        max-width: 100%;
+    }
+
+    .tiles-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 3px;
+    }
+
+    .shortcut-item {
+        padding: 8px;
+        min-height: 80px;
+        border-radius: 8px;
+    }
+
+    .shortcut-name {
+        font-size: 11px;
+    }
+
+    .shortcut-delete {
+        width: 18px;
+        height: 18px;
+        font-size: 14px;
+        top: 2px;
+        right: 2px;
+        border-radius: 8px;
+    }
+
+    .notes-section {
+        position: relative;
+        top: auto;
+        left: auto;
+        width: 100%;
+        max-width: none;
+        margin-bottom: 24px;
+        order: -1;
+    }
+
+    .notes-area {
+        height: 120px;
+        font-size: 14px;
+    }
+
+    .taskbar {
+        height: 36px;
+    }
+
+    .taskbar-center {
+        display: none;
+    }
+
+    .start-menu {
+        width: 280px;
+        max-height: 350px;
+    }
+
+    .notification {
+        width: 90%;
+        right: -100%;
+    }
+
+    .notification.show {
+        right: 5%;
+    }
+}

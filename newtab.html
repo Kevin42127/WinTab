@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WinTab</title>
+    <link rel="stylesheet" href="newtab.css">
+</head>
+<body>
+    <div class="desktop">
+        <div class="desktop-content">
+            
+            <!-- Clock -->
+            <div class="clock-section">
+                <div class="time" id="time">00:00</div>
+                <div class="date" id="date">Monday, 1/1/2024</div>
+            </div>
+
+            <!-- Search -->
+            <div class="search-section">
+                <div class="search-container">
+                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="Type here to search" class="search-input">
+                    <button id="searchBtn" class="search-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            
+            <!-- Tiles -->
+            <div class="tiles-section">
+                <div class="tiles-header">
+                    <h3>Shortcuts</h3>
+                    <button id="addShortcut" class="add-btn" title="Add tile">&#xE710;</button>
+                </div>
+                <div class="tiles-grid" id="shortcutsGrid"></div>
+            </div>
+        </div>
+
+        <!-- Start Menu -->
+        <div class="start-menu" id="startMenu">
+            <div class="start-menu-left">
+                <div class="start-menu-user">
+                    <div class="user-avatar">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                    </div>
+                    <span>User</span>
+                </div>
+                <nav class="start-menu-nav">
+                    <button class="start-nav-item" data-url="chrome://extensions/">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                        <span>Extensions</span>
+                    </button>
+                    <button class="start-nav-item" data-url="chrome://settings/">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                        <span>Settings</span>
+                    </button>
+                    <button class="start-nav-item" data-url="chrome://downloads/">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                        <span>Downloads</span>
+                    </button>
+                    <button class="start-nav-item" data-url="chrome://history/">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>History</span>
+                    </button>
+                    <button class="start-nav-item" data-url="chrome://bookmarks/">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+                        <span>Bookmarks</span>
+                    </button>
+                </nav>
+                <div class="start-menu-power">
+                    <button class="start-nav-item" id="startNewTab">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <span>New Tab</span>
+                    </button>
+                </div>
+            </div>
+        
+        </div>
+
+        <!-- Taskbar -->
+        <div class="taskbar">
+            <div class="taskbar-left">
+                <button class="start-btn" title="Start">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="1" y="1" width="10" height="10"/>
+                        <rect x="13" y="1" width="10" height="10"/>
+                        <rect x="1" y="13" width="10" height="10"/>
+                        <rect x="13" y="13" width="10" height="10"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="taskbar-center"></div>
+            <div class="taskbar-right"></div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <div class="notification-bar"></div>
+        <div class="notification-content">
+            <div class="notification-title" id="notificationTitle">Notice</div>
+            <div class="notification-message" id="notificationMessage">Message</div>
+            <button class="notification-close" id="notificationClose">&#xE711;</button>
+        </div>
+    </div>
+
+    <script src="newtab.js"></script>
+</body>
+</html>
