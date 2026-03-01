@@ -26,6 +26,25 @@ body {
     position: relative;
 }
 
+/* 半透明背景遮罩 - 只在有自訂背景圖片時顯示 */
+.desktop[style*="background-image"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 確保內容在遮罩之上 */
+.desktop-content {
+    position: relative;
+    z-index: 2;
+}
+
 .desktop-content {
     flex: 1;
     display: flex;
@@ -39,7 +58,7 @@ body {
 /* Clock — Windows 10 Lock Screen */
 .clock-section {
     text-align: center;
-    margin-bottom: 48px;
+    margin-bottom: 32px;
     color: #fff;
 }
 
@@ -57,6 +76,7 @@ body {
     opacity: 0.85;
 }
 
+
 /* Search — Windows 10 Cortana */
 .search-section {
     width: 100%;
@@ -67,12 +87,14 @@ body {
 .search-container {
     display: flex;
     align-items: center;
-    background: rgba(255, 255, 255, 0.12);
-    border: 2px solid rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 0;
     padding: 0 0 0 12px;
     transition: all 0.15s ease;
     height: 40px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .search-container:focus-within {
@@ -200,10 +222,13 @@ body {
     transition: background 0.15s;
     text-decoration: none;
     color: #fff;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.4);
     min-height: 100px;
     position: relative;
     overflow: hidden;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .shortcut-item:hover {
@@ -457,11 +482,12 @@ body {
 }
 
 .dialog-content {
-    background: #2b2b2b;
+    background: rgba(32, 32, 32, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
     padding: 24px;
-    width: 90%;
     max-width: 400px;
+    width: 90%;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     animation: dialogFadeIn 0.2s ease;
 }
@@ -473,8 +499,37 @@ body {
     margin-bottom: 20px;
 }
 
+.settings-group {
+    margin-bottom: 20px;
+}
+
+.settings-group h4 {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+.settings-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    font-size: 13px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.settings-group label:hover {
+    color: #fff;
+}
+
+.settings-group input[type="radio"] {
+    accent-color: #0078d4;
+}
+
 .form-group {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 .form-group label {
@@ -482,7 +537,7 @@ body {
     font-size: 14px;
     font-weight: 400;
     color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 6px;
+    margin-bottom: 12px;
 }
 
 .form-group input {
@@ -495,6 +550,77 @@ body {
     outline: none;
     color: #fff;
     transition: border-color 0.15s;
+}
+
+/* 檔案上傳按鈕自訂樣式 */
+.form-group input[type="file"] {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    padding: 12px 16px;
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.3s ease;
+    font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+}
+
+.form-group input[type="file"]:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.form-group input[type="file"]:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #0078d4;
+    outline: none;
+}
+
+/* 檔案上傳 label 樣式 */
+.file-upload-label {
+    display: block;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    padding: 12px 16px;
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.3s ease;
+    font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+}
+
+.file-upload-label:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.file-upload-label:focus-within {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #0078d4;
+    outline: none;
+}
+
+.file-upload-text {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+    font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+}
+
+.file-upload-label:hover .file-upload-text {
+    color: rgba(255, 255, 255, 1);
+}
+
+/* 當有檔案被選中時的樣式 */
+.file-upload-label.file-selected {
+    border-color: #4CAF50;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.file-upload-label.file-selected .file-upload-text {
+    color: #4CAF50;
+    content: "✅ File Selected";
 }
 
 .form-group input:focus {
@@ -529,6 +655,18 @@ body {
 
 .btn-cancel:hover {
     background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+.btn-clear {
+    background: rgba(220, 53, 69, 0.8);
+    color: #fff;
+    border: 1px solid rgba(220, 53, 69, 0.9);
+}
+
+.btn-clear:hover {
+    background: rgba(220, 53, 69, 1);
+    color: #fff;
 }
 
 .btn-confirm {
@@ -714,3 +852,4 @@ body {
         right: 5%;
     }
 }
+

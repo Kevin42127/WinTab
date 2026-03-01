@@ -7,7 +7,11 @@ class NewTabManager {
 
     async init() {
         await this.loadShortcuts();
-        this.bindEvents();
+        
+        // 載入並應用背景圖片
+        const backgroundImage = await this.loadBackground();
+        this.setBackgroundImage(backgroundImage);
+        
         this.startClock();
         this.loadUserInfo();
     }
@@ -85,10 +89,12 @@ class NewTabManager {
             this.performSearch();
         });
 
+        
         document.getElementById('addShortcut').addEventListener('click', () => {
             this.addShortcut();
         });
 
+        
         document.getElementById('clearAllShortcuts').addEventListener('click', () => {
             this.clearAllShortcuts();
         });
@@ -103,6 +109,16 @@ class NewTabManager {
         startBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             startMenu.classList.toggle('open');
+            
+            // 綁定背景設定事件（只在開始選單打開時綁定一次）
+            const backgroundBtn = document.getElementById('customBackground');
+            if (backgroundBtn && !backgroundBtn.hasAttribute('data-bound')) {
+                backgroundBtn.addEventListener('click', () => {
+                    this.openBackgroundDialog();
+                    startMenu.classList.remove('open');
+                });
+                backgroundBtn.setAttribute('data-bound', 'true');
+            }
         });
 
         
@@ -402,8 +418,146 @@ class NewTabManager {
             userElement.textContent = username;
         }
     }
+
+    async loadBackground() {
+        try {
+            // 優先從 chrome.storage.sync 讀取
+            const syncStored = await chrome.storage.sync.get('backgroundImage');
+            if (syncStored.backgroundImage) {
+                return syncStored.backgroundImage;
+            }
+            
+            // 如果 sync 中沒有，嘗試從 chrome.storage.local 讀取
+            const localStored = await chrome.storage.local.get('backgroundImage');
+            return localStored.backgroundImage || null;
+        } catch (error) {
+            console.error('Failed to load background:', error);
+            return null;
+        }
+    }
+
+    setBackgroundImage(imageData) {
+        const desktop = document.querySelector('.desktop');
+        if (imageData) {
+            desktop.style.backgroundImage = `url(${imageData})`;
+            desktop.style.backgroundSize = 'cover';
+            desktop.style.backgroundPosition = 'center';
+            desktop.style.backgroundRepeat = 'no-repeat';
+        } else {
+            desktop.style.backgroundImage = '';
+        }
+    }
+
+    openBackgroundDialog() {
+        const dialog = document.createElement('div');
+        dialog.className = 'shortcut-dialog';
+        dialog.innerHTML = `
+            <div class="dialog-content">
+                <h3>Custom Background</h3>
+                <div class="form-group">
+                    <label for="backgroundFile" class="file-upload-label">
+                        <span class="file-upload-text">Choose File</span>
+                        <input type="file" id="backgroundFile" accept="image/*" style="display: none;">
+                    </label>
+                </div>
+                <div class="dialog-buttons">
+                    <button class="btn-cancel">Cancel</button>
+                    <button class="btn-clear" id="clearBackground">Clear Background</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(dialog);
+        
+        const closeDialog = () => {
+            dialog.remove();
+        };
+        
+        dialog.addEventListener('click', (e) => {
+            if (e.target === dialog) {
+                closeDialog();
+            }
+        });
+        
+        dialog.querySelector('.btn-cancel').addEventListener('click', closeDialog);
+        
+        dialog.querySelector('.btn-clear').addEventListener('click', async () => {
+            try {
+                // 清除兩個儲存位置的背景
+                await chrome.storage.sync.remove('backgroundImage');
+                await chrome.storage.local.remove('backgroundImage');
+                
+                // 清除背景顯示
+                this.setBackgroundImage(null);
+                
+                this.showNotification('Background cleared successfully', 'success');
+                closeDialog();
+            } catch (error) {
+                console.error('Failed to clear background:', error);
+                this.showNotification('Failed to clear background', 'error');
+            }
+        });
+        
+        // 監聽檔案選擇變化 - 選擇後自動應用背景
+        const fileInput = dialog.querySelector('#backgroundFile');
+        const uploadLabel = dialog.querySelector('.file-upload-label');
+        const uploadText = dialog.querySelector('.file-upload-text');
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                const file = e.target.files[0];
+                uploadLabel.classList.add('file-selected');
+                uploadText.textContent = '✅ File Selected';
+                
+                // 自動讀取並應用背景
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                    try {
+                        const imageData = event.target.result;
+                        await this.saveBackground(imageData);
+                        this.setBackgroundImage(imageData);
+                        this.showNotification('Background applied successfully', 'success');
+                        
+                        // 立即關閉對話框
+                        closeDialog();
+                    } catch (error) {
+                        console.error('Failed to apply background:', error);
+                        this.showNotification('Failed to apply background', 'error');
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else {
+                uploadLabel.classList.remove('file-selected');
+                uploadText.textContent = 'Choose File';
+            }
+        });
+    }
+
+    
+    async saveBackground(imageData) {
+        try {
+            // 檢查圖片大小，chrome.storage.sync 有 8KB 項目限制和 100KB 總限制
+            const dataSize = new TextEncoder().encode(imageData).length;
+            const SYNC_ITEM_QUOTA = 8192; // 8KB
+            
+            if (dataSize > SYNC_ITEM_QUOTA) {
+                console.warn('Background image too large for sync storage, using local storage instead.');
+                await chrome.storage.local.set({ backgroundImage: imageData });
+            } else {
+                await chrome.storage.sync.set({ backgroundImage: imageData });
+            }
+        } catch (error) {
+            console.error('Failed to save background:', error);
+            throw error;
+        }
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    new NewTabManager();
+    const manager = new NewTabManager();
+    
+    // 等待 DOM 完全載入後綁定事件
+    setTimeout(() => {
+        manager.bindEvents();
+    }, 0);
 });
