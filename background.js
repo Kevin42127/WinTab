@@ -1,5 +1,13 @@
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener((details) => {
     console.log('WinTab installed');
+    
+    // 只在首次安裝時打開歡迎頁面
+    if (details.reason === 'install') {
+        chrome.tabs.create({
+            url: 'https://wintab.vercel.app/',
+            active: true
+        });
+    }
 });
 
 // Initialize default settings

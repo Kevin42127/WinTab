@@ -119,6 +119,16 @@ class NewTabManager {
                 });
                 backgroundBtn.setAttribute('data-bound', 'true');
             }
+
+            // 綁定清除搜尋歷史事件（只在開始選單打開時綁定一次）
+            const clearHistoryBtn = document.getElementById('clearSearchHistory');
+            if (clearHistoryBtn && !clearHistoryBtn.hasAttribute('data-bound')) {
+                clearHistoryBtn.addEventListener('click', () => {
+                    this.clearSearchHistory();
+                    startMenu.classList.remove('open');
+                });
+                clearHistoryBtn.setAttribute('data-bound', 'true');
+            }
         });
 
         
@@ -161,12 +171,14 @@ class NewTabManager {
             if (is12HourRegion) {
                 const hours = now.getHours() % 12 || 12;
                 const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
                 const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
-                timeStr = `${hours}:${minutes} ${ampm}`;
+                timeStr = `${hours}:${minutes}:${seconds} ${ampm}`;
             } else {
                 const hours = String(now.getHours()).padStart(2, '0');
                 const minutes = String(now.getMinutes()).padStart(2, '0');
-                timeStr = `${hours}:${minutes}`;
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                timeStr = `${hours}:${minutes}:${seconds}`;
             }
             
             const year = now.getFullYear();
@@ -176,7 +188,21 @@ class NewTabManager {
             const weekday = weekdays[now.getDay()];
             const dateStr = `${weekday}, ${month}/${day}/${year}`;
             
-            document.getElementById('time').textContent = timeStr;
+            const timeElement = document.getElementById('time');
+            const currentContent = timeElement.textContent;
+            
+            // 只在時間實際改變時才更新和觸發動畫
+            if (currentContent !== timeStr) {
+                // 添加更新動畫類
+                timeElement.classList.add('updating');
+                
+                // 短暫延遲後更新內容並移除動畫
+                setTimeout(() => {
+                    timeElement.textContent = timeStr;
+                    timeElement.classList.remove('updating');
+                }, 150);
+            }
+            
             document.getElementById('date').textContent = dateStr;
         };
         
@@ -205,8 +231,10 @@ class NewTabManager {
             return `
             <div class="shortcut-item" data-index="${index}" data-url="${shortcut.url}">
                 <button class="shortcut-delete" data-index="${index}" title="Remove">&times;</button>
-                ${shortcut.icon ? `<div class="shortcut-icon"><img src="${shortcut.icon}" alt="${shortcut.name}" style="display:block;"></div>` : ''}
-                <div class="shortcut-name">${shortcut.name}</div>
+                <div class="shortcut-content" draggable="true">
+                    ${shortcut.icon ? `<div class="shortcut-icon"><img src="${shortcut.icon}" alt="${shortcut.name}" style="display:block;"></div>` : ''}
+                    <div class="shortcut-name">${shortcut.name}</div>
+                </div>
             </div>
         `;
         }).join('');
@@ -215,6 +243,64 @@ class NewTabManager {
             item.addEventListener('click', (e) => {
                 if (e.target.closest('.shortcut-delete')) return;
                 window.open(item.dataset.url, '_blank');
+            });
+
+            const content = item.querySelector('.shortcut-content');
+            
+            // 拖曳開始
+            content.addEventListener('dragstart', (e) => {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/html', content.innerHTML);
+                item.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', item.dataset.index);
+            });
+
+            // 拖曳結束
+            content.addEventListener('dragend', (e) => {
+                item.classList.remove('dragging');
+            });
+
+            // 拖曳經過
+            item.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                
+                const draggingItem = document.querySelector('.dragging');
+                if (draggingItem && draggingItem !== item) {
+                    const rect = item.getBoundingClientRect();
+                    const midpoint = rect.left + rect.width / 2;
+                    
+                    if (e.clientX < midpoint) {
+                        item.parentNode.insertBefore(draggingItem, item);
+                    } else {
+                        item.parentNode.insertBefore(draggingItem, item.nextSibling);
+                    }
+                    this.updateShortcutOrder();
+                }
+            });
+
+            // 拖曳進入
+            content.addEventListener('dragenter', (e) => {
+                e.preventDefault();
+                item.classList.add('drag-over');
+            });
+
+            // 拖曳離開
+            content.addEventListener('dragleave', (e) => {
+                item.classList.remove('drag-over');
+            });
+
+            // 放置
+            content.addEventListener('drop', (e) => {
+                e.preventDefault();
+                item.classList.remove('drag-over');
+                
+                const draggedIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                const targetIndex = parseInt(item.dataset.index);
+                
+                if (draggedIndex !== targetIndex) {
+                    this.reorderShortcuts(draggedIndex, targetIndex);
+                }
             });
         });
 
@@ -533,6 +619,50 @@ class NewTabManager {
         });
     }
 
+    updateShortcutOrder() {
+        const items = document.querySelectorAll('.shortcut-item');
+        const newOrder = [];
+        
+        items.forEach(item => {
+            const index = parseInt(item.dataset.index);
+            newOrder.push(this.shortcuts[index]);
+        });
+        
+        this.shortcuts = newOrder;
+        this.saveShortcuts();
+        this.renderShortcuts();
+    }
+
+    async reorderShortcuts(fromIndex, toIndex) {
+        const movedShortcut = this.shortcuts.splice(fromIndex, 1)[0];
+        this.shortcuts.splice(toIndex, 0, movedShortcut);
+        
+        await this.saveShortcuts();
+        this.renderShortcuts();
+        this.showNotification('Shortcuts reordered successfully', 'success');
+    }
+
+    async clearSearchHistory() {
+        try {
+            // 清除 Chrome 瀏覽器的搜尋歷史
+            await chrome.history.deleteAll();
+            
+            // 清除本地儲存的搜尋建議（如果有的話）
+            await chrome.storage.local.remove(['searchSuggestions', 'recentSearches']);
+            await chrome.storage.sync.remove(['searchSuggestions', 'recentSearches']);
+            
+            // 清除搜尋框的內容
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+            
+            this.showNotification('Search history cleared successfully', 'success');
+        } catch (error) {
+            console.error('Failed to clear search history:', error);
+            this.showNotification('Failed to clear search history', 'error');
+        }
+    }
     
     async saveBackground(imageData) {
         try {
