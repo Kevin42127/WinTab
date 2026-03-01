@@ -16,6 +16,13 @@ class NewTabManager {
         try {
             const stored = await chrome.storage.sync.get('shortcuts');
             this.shortcuts = stored.shortcuts || await this.getDefaultShortcuts();
+            
+            // 確保所有快捷方式都有圖示
+            this.shortcuts = this.shortcuts.map(shortcut => ({
+                ...shortcut,
+                icon: shortcut.icon || this.getFavicon(shortcut.url)
+            }));
+            
             this.renderShortcuts();
         } catch (error) {
             console.error('Failed to load shortcuts:', error);
@@ -43,7 +50,25 @@ class NewTabManager {
     }
 
     getFavicon(url) {
-        return ''; // Don't display icon
+        try {
+            console.log('Getting favicon for:', url);
+            
+            // 確保 URL 格式正確
+            if (!url || typeof url !== 'string') {
+                console.warn('Invalid URL, cannot fetch favicon:', url);
+                return '';
+            }
+            
+            // 如果不是完整 URL，加上 https://
+            const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+            const domain = new URL(fullUrl).hostname;
+            const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+            console.log('Favicon URL:', faviconUrl);
+            return faviconUrl;
+        } catch (error) {
+            console.error('Failed to get favicon for:', url, error);
+            return '';
+        }
     }
 
     bindEvents() {
@@ -64,6 +89,10 @@ class NewTabManager {
             this.addShortcut();
         });
 
+        document.getElementById('clearAllShortcuts').addEventListener('click', () => {
+            this.clearAllShortcuts();
+        });
+
         document.getElementById('notificationClose').addEventListener('click', () => {
             this.hideNotification();
         });
@@ -76,6 +105,7 @@ class NewTabManager {
             startMenu.classList.toggle('open');
         });
 
+        
         document.addEventListener('click', (e) => {
             if (!startMenu.contains(e.target) && !startBtn.contains(e.target)) {
                 startMenu.classList.remove('open');
@@ -103,9 +133,25 @@ class NewTabManager {
     startClock() {
         const updateClock = () => {
             const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const timeStr = `${hours}:${minutes}`;
+            
+            // 偵測是否為偏好 12 小時制的地區
+            const is12HourRegion = navigator.language.includes('en-US') || 
+                                  navigator.language.includes('en-CA') ||
+                                  navigator.language.includes('en-AU') ||
+                                  navigator.language.includes('en-NZ') ||
+                                  navigator.language.includes('en-PH');
+            
+            let timeStr;
+            if (is12HourRegion) {
+                const hours = now.getHours() % 12 || 12;
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
+                timeStr = `${hours}:${minutes} ${ampm}`;
+            } else {
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                timeStr = `${hours}:${minutes}`;
+            }
             
             const year = now.getFullYear();
             const month = now.getMonth() + 1;
@@ -138,12 +184,16 @@ class NewTabManager {
 
     renderShortcuts() {
         const grid = document.getElementById('shortcutsGrid');
-        grid.innerHTML = this.shortcuts.map((shortcut, index) => `
+        grid.innerHTML = this.shortcuts.map((shortcut, index) => {
+            console.log('Shortcut:', shortcut.name, 'Icon:', shortcut.icon);
+            return `
             <div class="shortcut-item" data-index="${index}" data-url="${shortcut.url}">
                 <button class="shortcut-delete" data-index="${index}" title="Remove">&times;</button>
-                                <div class="shortcut-name">${shortcut.name}</div>
+                ${shortcut.icon ? `<div class="shortcut-icon"><img src="${shortcut.icon}" alt="${shortcut.name}" style="display:block;"></div>` : ''}
+                <div class="shortcut-name">${shortcut.name}</div>
             </div>
-        `).join('');
+        `;
+        }).join('');
 
         grid.querySelectorAll('.shortcut-item').forEach(item => {
             item.addEventListener('click', (e) => {
@@ -167,6 +217,53 @@ class NewTabManager {
         await this.saveShortcuts();
         this.renderShortcuts();
         this.showNotification(`Removed "${name}"`, 'info');
+    }
+
+    async clearAllShortcuts() {
+        if (this.shortcuts.length === 0) {
+            this.showNotification('No shortcuts to clear', 'info');
+            return;
+        }
+
+        const dialog = document.createElement('div');
+        dialog.className = 'shortcut-dialog';
+        dialog.innerHTML = `
+            <div class="dialog-content">
+                <h3>Clear All Shortcuts</h3>
+                <p style="color: white;">Are you sure you want to remove all shortcuts? This action cannot be undone.</p>
+                <div class="dialog-buttons">
+                    <button class="btn-cancel">Cancel</button>
+                    <button class="btn-confirm">Clear All</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(dialog);
+        
+        const cancelBtn = dialog.querySelector('.btn-cancel');
+        const confirmBtn = dialog.querySelector('.btn-confirm');
+        
+        const closeDialog = () => {
+            dialog.remove();
+        };
+        
+        // 點擊外部關閉模態框
+        dialog.addEventListener('click', (e) => {
+            if (e.target === dialog) {
+                closeDialog();
+            }
+        });
+        
+        cancelBtn.addEventListener('click', closeDialog);
+        
+        confirmBtn.addEventListener('click', async () => {
+            const count = this.shortcuts.length;
+            this.shortcuts = [];
+            await this.saveShortcuts();
+            this.renderShortcuts();
+            this.showNotification(`Cleared ${count} shortcuts`, 'success');
+            closeDialog();
+        });
     }
 
     async addShortcut() {
@@ -200,6 +297,13 @@ class NewTabManager {
         const closeDialog = () => {
             dialog.remove();
         };
+        
+        // 點擊外部關閉模態框
+        dialog.addEventListener('click', (e) => {
+            if (e.target === dialog) {
+                closeDialog();
+            }
+        });
         
         cancelBtn.addEventListener('click', closeDialog);
         
